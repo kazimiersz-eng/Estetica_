@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía de Estética Musical: Árbol de Decisión</title>
+    <style>
+        :root {
+            --primary: #2C3E50;
+            --secondary: #18BC9C;
+            --bg-color: #F8F9FA;
+            --text-color: #333333;
+            --card-bg: #FFFFFF;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+
+        .question-box {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button.option-btn {
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 15px 20px;
+            font-size: 1em;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        button.option-btn:hover {
+            background-color: var(--primary);
+            color: #FFF;
+        }
+
+        .results-container {
+            display: none;
+        }
+
+        .author-card {
+            background: var(--bg-color);
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .author-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .author-meta {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .keywords {
+            background-color: #E8F8F5;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #117A65;
+            margin-top: 15px;
+        }
+
+        .btn-restart {
+            display: block;
+            width: 100%;
+            background-color: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 30px;
+            font-weight: bold;
+        }
+
+        .btn-restart:hover {
+            background-color: #128f76;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Guía de Comentario: Estética Musical</h1>
+    
+    <div id="quiz-section">
+        <div class="question-box" id="question-text"></div>
+        <div class="options-container" id="options-box"></div>
+    </div>
+
+    <div id="results-section" class="results-container">
+        <div class="question-box">Candidatos probables basados en tu lectura:</div>
+        <p style="text-align: center; margin-bottom: 20px;">Busca en tu texto las <strong>palabras delatoras</strong> para confirmar el autor.</p>
+        <div id="authors-box"></div>
+        <button class="btn-restart" onclick="startQuiz()">Comenzar nuevo análisis</button>
+    </div>
+</div>
+
+<script>
+    const db = [
+        { name: "Pitágoras", axis: "Eje 1 — Polo A (Objetivismo)", era: "Antigüedad griega, s. VI a.C.", idea: "La belleza reside en proporciones matemáticas. Relaciones interválicas exactas. La música es matemática audible.", cl: "Origen de la teoría que vincula belleza con corrección acústica o proporcional.", keywords: "proporción, número, cosmos, armonía universal, orden matemático.", group: "A1" },
+        { name: "Boecio", axis: "Eje 1 — Polo A (Objetivismo)", era: "Alta Edad Media, s. V-VI d.C.", idea: "Cristianizó a Pitágoras. Distinguió musica mundana, humana e instrumentalis. Estudiar música es estudiar matemáticas.", cl: "Explica la supremacía de la teoría sobre la práctica en la Edad Media.", keywords: "musica mundana, quadrivium, armonía divina, especulación teórica.", group: "A1" },
+        { name: "Zarlino", axis: "Eje 2 — Polo A (Normas causalistas)", era: "Renacimiento, Italia, s. XVI", idea: "Codificó las reglas del contrapunto. Estableció qué combinaciones eran consonantes o disonantes. Arquitectura racional.", cl: "Mentalidad de oficio reglado. Corrección técnica según normas.", keywords: "consonancia, disonancia, regla, tratado, corrección, preparación.", group: "A1" },
+        { name: "Fux", axis: "Eje 2 — Polo A (Normas causalistas)", era: "Barroco tardío, Austria, 1725", idea: "Método de 'especies'. El valor musical equivale a la corrección técnica demostrable en etapas progresivas.", cl: "Referencia del modelo pedagógico normativo puro.", keywords: "especies, contrapunto, corrección, escuela, preceptos, maestros.", group: "A1" },
+        
+        { name: "Wackenroder y Tieck", axis: "Eje 1 — Polo B (Subjetivismo)", era: "Romanticismo temprano, Alemania", idea: "Música instrumental como arte supremo por ser inefable. Religión del sentimiento para tocar lo Absoluto e Infinito.", cl: "Culto romántico a la música instrumental como lenguaje del alma.", keywords: "inefable, infinito, alma, religión del sentimiento, lenguaje sagrado.", group: "A2" },
+        { name: "Baumgarten", axis: "Eje 2 — Polo B (Gusto estético)", era: "Ilustración, Alemania, 1750", idea: "Inventó la 'Estética'. Disciplina para estudiar el conocimiento sensible y el placer/displacer de los sentidos.", cl: "La experiencia del oyente como objeto de estudio serio.", keywords: "conocimiento sensible, percepción, experiencia estética, ciencia de lo bello.", group: "A2" },
+        { name: "Kant", axis: "Eje 2 — Polo B (Gusto estético)", era: "Ilustración, Alemania, 1790", idea: "Analizó el 'juicio de gusto'. Placer desinteresado con validez universal sin concepto lógico.", cl: "Justifica por qué el criterio del oyente culto tiene autoridad estética propia.", keywords: "placer desinteresado, juicio de gusto, buen gusto, universalidad sin concepto.", group: "A2" },
+
+        { name: "Hanslick", axis: "Eje 3 — Polo A (Autonomía / Música absoluta)", era: "Romanticismo tardío, Viena, 1854", idea: "La música no expresa nada externo. Su belleza son 'formas sonoras en movimiento'.", cl: "Justificación teórica de la música instrumental pura frente a la música programática.", keywords: "formas sonoras, música absoluta, música pura, arquitectura sonora, formalismo.", group: "B1" },
+        { name: "Brahms", axis: "Eje 3 — Polo A (Autonomía / Música absoluta)", era: "Romanticismo tardío, s. XIX", idea: "Encarnación práctica del formalismo. Defensor de las formas clásicas sin programa literario.", cl: "Opción conservadora en la guerra romántica. Defensor de sonatas y sinfonías puras.", keywords: "sinfonía, forma sonata, música pura, sin programa, tradición clásica.", group: "B1" },
+
+        { name: "Liszt", axis: "Eje 3 — Polo B (Heteronomía)", era: "Romanticismo, s. XIX", idea: "Inventor del poema sinfónico. La música necesita un 'prefacio poético' (programa) para anclarse a un significado extramusical.", cl: "Modelo de música instrumental que necesita aliarse con otras artes.", keywords: "poema sinfónico, programa, prefacio poético, idea extramusical, narración.", group: "B2" },
+        { name: "Wagner", axis: "Ejes 3 B y 4 A", era: "Romanticismo, s. XIX", idea: "Gesamtkunstwerk (Obra de Arte Total). Fusión donde la música se subordina al texto dramático.", cl: "Fusión de las artes y crítica de la música instrumental aislada.", keywords: "Gesamtkunstwerk, drama musical, unión de las artes, obra de arte total, texto dramático.", group: "B2" },
+        { name: "Monteverdi", axis: "Eje 4 — Polo A (Primacía de la palabra)", era: "Barroco temprano, Italia, 1605", idea: "Seconda Pratica: 'Que la palabra sea dueña de la armonía y no su sirvienta'.", cl: "Referencia fundacional del debate texto-música. El significado poético prima sobre las reglas.", keywords: "seconda pratica, la palabra manda, afectos, declamación, inteligibilidad del texto.", group: "B2" },
+        { name: "Gluck", axis: "Eje 4 — Polo A (Primacía de la palabra)", era: "Clasicismo, s. XVIII", idea: "Reforma de la Ópera. Eliminar abusos de cantantes. Música al servicio del texto poético y la verdad dramática.", cl: "Referencia del movimiento reformista contra los excesos vocales.", keywords: "reforma, sencillez dramática, servicio a la poesía, abuso de los cantantes, verdad expresiva.", group: "B2" },
+
+        { name: "Rossini y el Bel Canto", axis: "Eje 4 — Polo B (Primacía de la música)", era: "S. XIX, Italia", idea: "La ópera es el reino de la voz. Texto secundario; prima el virtuosismo, la belleza tímbrica y el lucimiento vocal.", cl: "Supremacía del placer sonoro puro sobre la coherencia dramática.", keywords: "bel canto, coloratura, agilidad vocal, ornamentación, virtuosismo, la voz como fin.", group: "B3" },
+
+        { name: "Stravinsky", axis: "Ejes 5 A y 6 A", era: "Neoclasicismo, s. XX", idea: "Música incapaz de expresar. Ordenación de cosas. Intérpretes literales sin libertades expresivas.", cl: "Polo apolíneo (frialdad) y Werktreue (fidelidad absoluta a la partitura).", keywords: "neoclasicismo, ordenación, frialdad constructiva, ejecutante, literalidad, anti-expresionismo.", group: "C1" },
+        { name: "Toscanini", axis: "Eje 6 — Polo A (Werktreue)", era: "S. XX, director de orquesta", idea: "Com'è scritto (como está escrito). Rechazo de libertades agógicas. Anulación del ego del intérprete.", cl: "Referencia práctica del objetivismo aplicado a la dirección musical.", keywords: "com'è scritto, literalidad, tempo exacto, fidelidad, neutralidad del intérprete.", group: "C1" },
+
+        { name: "Mahler", axis: "Eje 5 — Polo B (Dionisíaco)", era: "Postrromanticismo, fin s. XIX", idea: "Construir un mundo. Sinfonía como confesión psicológica total, contraste brutal y urgencia expresiva.", cl: "Compositor que subordina la forma a la expresión de subjetividad extrema.", keywords: "construcción de un mundo, autobiografía sonora, urgencia expresiva, contraste extremo, saturación.", group: "C2" },
+        { name: "Schoenberg", axis: "Ejes 5 B y 6 B", era: "Expresionismo, Viena", idea: "Arte nacido de una necesidad interior. Emancipación de la disonancia para expresar el trauma y el inconsciente.", cl: "Referencia de la verdad expresiva sobre la belleza, ruptura con la tonalidad.", keywords: "necesidad interior, atonalismo, emancipación de la disonancia, inconsciente, verdad expresiva.", group: "C2" },
+
+        { name: "Cage", axis: "Eje 6 — Polo B (Recreación)", era: "Vanguardia, s. XX", idea: "Renuncia al control sonoro. Indeterminación, azar, evento irrepetible.", cl: "El compositor renuncia al control; intérprete o azar como co-creadores.", keywords: "indeterminación, aleatoriedad, partitura gráfica, silencio, evento sonoro, co-creador.", group: "C3" },
+        { name: "Historicismo", axis: "Eje 6 — Polo B (Recreación)", era: "Práctica informada, s. XX", idea: "La fidelidad histórica exige libertad: improvisar bajo continuo, ornamentar. No leer literalmente.", cl: "Argumento paradójico: fidelidad es atreverse a recrear creativamente los estilos de la época.", keywords: "bajo continuo, ornamentación, improvisación, práctica histórica informada, libertad estilística.", group: "C3" }
+    ];
+
+    const questions = {
+        start: {
+            text: "¿De qué tema principal trata el texto de tu examen?",
+            options: [
+                { text: "Habla del origen de la belleza, las matemáticas, la técnica o de cómo juzga el oyente el arte.", next: "qA" },
+                { text: "Habla sobre si la música debe ser pura forma, o si debe unirse a un texto, una historia o subordinarse al cantante.", next: "qB" },
+                { text: "Habla sobre la psicología del creador, la frialdad vs. la emoción extrema, o el papel (libre o estricto) del intérprete.", next: "qC" }
+            ]
+        },
+        qA: {
+            text: "¿Dónde sitúa el texto el valor o la justificación de la música?",
+            options: [
+                { text: "En el orden del cosmos, las matemáticas, o en cumplir las reglas de los tratados y la técnica correcta.", next: "A1" },
+                { text: "En lo espiritual/inefable, en el placer de los sentidos o en el 'buen gusto' estético del oyente.", next: "A2" }
+            ]
+        },
+        qB: {
+            text: "¿Qué postura defiende sobre el significado o la función de la música?",
+            options: [
+                { text: "La música se basta a sí misma (es pura forma sonora y arquitectura) y no necesita contar nada.", next: "B1" },
+                { text: "La música debe expresar ideas, aliarse con la literatura o ponerse al estricto servicio de la poesía/drama.", next: "B2" },
+                { text: "Lo literario es secundario; lo que importa es el virtuosismo vocal, el lucimiento y la belleza pura de la voz.", next: "B3" }
+            ]
+        },
+        qC: {
+            text: "¿Qué actitud exige del compositor o del intérprete?",
+            options: [
+                { text: "Frialdad, control, construcción lógica y lectura literal de la partitura (sin añadir expresión personal).", next: "C1" },
+                { text: "Subjetividad desbordada, confesar el mundo interior, traumas o necesidad expresiva profunda.", next: "C2" },
+                { text: "El intérprete debe ser libre: improvisar, ornamentar, o incluso dejar decisiones al azar (indeterminación).", next: "C3" }
+            ]
+        }
+    };
+
+    function startQuiz() {
+        document.getElementById('results-section').style.display = 'none';
+        document.getElementById('quiz-section').style.display = 'block';
+        loadQuestion('start');
+    }
+
+    function loadQuestion(qId) {
+        if (questions[qId]) {
+            document.getElementById('question-text').innerText = questions[qId].text;
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
+            questions[qId].options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.text;
+                btn.onclick = () => loadQuestion(opt.next);
+                optionsBox.appendChild(btn);
+            });
+        } else {
+            showResults(qId);
+        }
+    }
+
+    function showResults(groupId) {
+        document.getElementById('quiz-section').style.display = 'none';
+        document.getElementById('results-section').style.display = 'block';
+        
+        const authorsBox = document.getElementById('authors-box');
+        authorsBox.innerHTML = '';
+
+        const filteredAuthors = db.filter(a => a.group === groupId);
+
+        filteredAuthors.forEach(author => {
+            const card = document.createElement('div');
+            card.className = 'author-card';
+            
+            const copyText = `${author.name}\nEje: ${author.axis}\nÉpoca: ${author.era}\nQué defendía: ${author.idea}\nPor qué importa: ${author.cl}\nPalabras delatoras: ${author.keywords}`;
+            
+            card.innerHTML = `
+                <button class="copy-btn" onclick="navigator.clipboard.writeText(\`${copyText}\`).then(()=>alert('Ficha copiada al portapapeles'))">Copiar ficha</button>
+                <div class="author-name">${author.name}</div>
+                <div class="author-meta">${author.axis} | ${author.era}</div>
+                <div><strong>Qué defendía:</strong> ${author.idea}</div>
+                <div style="margin-top: 10px;"><strong>Aplicación Clarinete:</strong> ${author.cl}</div>
+                <div class="keywords">🔎 Palabras delatoras: ${author.keywords}</div>
+            `;
+            authorsBox.appendChild(card);
+        });
+    }
+
+    window.onload = startQuiz;
+</script>
+
+</body>
+</html>
